@@ -1,6 +1,7 @@
 //onst http = require('http'); //import file with path or module like this
 const path = require('path');
 const express = require('express');
+const db = require('./util/database');
 const PORT = 3000;
 const ejs = require('ejs');
 
@@ -11,6 +12,13 @@ const app = express();
 const routerAdmin = require('./routes/admin');
 const routerShop = require('./routes/shop')
 
+db.execute('SELECT * FROM products')
+  .then(result => {
+    console.log(result);
+  })
+  .catch(err => {
+    console.log(err);
+  })
 /* EJS */
 app.set('view engine', 'ejs');
 
