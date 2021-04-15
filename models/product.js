@@ -1,10 +1,7 @@
-//const products = [];
-const fs = require('fs');
-const path = require('path');
-
+const db = require('../util/database');
 const Cart = require('./cart');
 
-const pathData = path.join(path.dirname(require.main.filename),'data','product.json')
+//const pathData = path.join(path.dirname(require.main.filename),'data','product.json')
 
 const findProduct = (callback) =>{
   fs.readFile(pathData, (err, fileContent)=>{
@@ -17,43 +14,16 @@ const findProduct = (callback) =>{
 }
 
 module.exports = class Product {
-  constructor(id, title, imageUrl, description, price) {
+  constructor(id, title, price, description, imageUrl) {
     this.id = id
     this.title = title
-    this.image = imageUrl
+    this.imageUrl = imageUrl
     this.description = description
     this.price = price
   }
 
   save(){
-    //products.push(this)
-    findProduct(products => {
-      if(this.id){
-        const existingProductIndex  = products.findIndex(prod => prod.id === this.id);
-        const updateProduct = [...products];
-        updateProduct[existingProductIndex] = this;
-        fs.writeFile(pathData, JSON.stringify(updateProduct), err => {
-          console.log(err);
-        });
-      } else {
-        this.id = Math.random().toString();
-        products.push(this)
-        fs.writeFile(pathData, JSON.stringify(products), err => {
-          console.log(err);
-        });
-      }
-    })
-    // fs.readFile(pathData, (err, fileContent)=>{
-    //   console.log(fileContent);
-    //   let products = [];
-    //   if(!err){
-    //     products = JSON.parse(fileContent);
-    //   }
-    //   products.push(this)
-    //   fs.writeFile(pathData, JSON.stringify(products), err => {
-    //     console.log(err);
-    //   });
-    // })
+    return db.execute('INSERT INTO products(title, price, description, imageUrl) VALUES (?, ?, ?, ?)',[this.title, this.price, this.description, this.imageUrl])
   }
 
   static deleteById(id) {
@@ -70,21 +40,12 @@ module.exports = class Product {
     })
   }
 
-  static fetchAll(callback){
-    fs.readFile(pathData, (err, fileContent)=>{
-      if(err){
-        callback([]);
-      }else {
-        callback(JSON.parse(fileContent));
-      }
-    })
-    //return products
+  static fetchAll(){
+    return db.execute('SELECT * FROM products');
   }
-  static fetchById(id, callback) {
-    findProduct(products => {
-      const product = products.find( p => p.id === id)
-      callback(product)
-    })
+
+  static fetchById(id) {
+    return db.execute('SELECT * FROM products WHERE products.id = ?', [id])
   }
 }
   
