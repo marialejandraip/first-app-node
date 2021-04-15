@@ -1,4 +1,6 @@
 # Dependency directories
+.DS_Store
 node_modules/
-
-.vscode
+*.swp
+.nyc_output/
+coverage/
