@@ -3,38 +3,46 @@ const Cart = require('../models/cart');
 
 // Here is the path '/'
 exports.getIndex = (req, res, next)=>{
-  Product.fetchAll()
-  .then(([rows, fieldData]) => {
+  Product.findAll().then(products => {
     res.render('shop/index', {
       docTitle:"My Shop!", 
-      prods: rows, 
+      prods: products, 
       path:"/"
     })
+
   }).catch(err => console.log(err))
 };
 
 // Here path is 'products'
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
-    .then(([rows, fieldData]) => {
-      res.render('shop/product-list', {
-        docTitle:'Products', 
-        prods: rows, 
-        path:'products'
-      })
+  Product.findAll().then(products => {
+    res.render('shop/product-list', {
+      docTitle:'Products', 
+      prods: products, 
+      path:'/products'
     })
-    .catch(err => console.log(err))
+  }).catch(err => console.log(err))
 }
 
 // Here get just one product by id 
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.id
   console.log(prodId)
-  Product.fetchById(prodId)
-    .then(([product]) => {
+  // Product.findAll({where:{id: prodId}})
+  // .then((product) => {
+  //   res.render('shop/product-detail',{ 
+  //     product:product[0],  
+  //     docTitle:product[0].title, 
+  //     path:'/products'
+  //   })
+  // })
+  // .catch(err => console.log(err));
+  // Other way to find by id 
+  Product.findByPk(prodId)
+    .then((product) => {
       res.render('shop/product-detail',{ 
-        product:product[0], 
-        docTitle: 'Detail', 
+        product:product,  
+        docTitle:'Detail', 
         path:'/products'
       })
     })

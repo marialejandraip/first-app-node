@@ -1,12 +1,16 @@
-const mysql = require('mysql2');
+const Sequelize = require('sequelize');
 
-//Createpool creara varias conexiones
-//Se pasa como argumento un objeto js
-const pool = mysql.createPool({
-  host:'localhost',
-  user: 'root',
-  database: 'SCHEMA_NAME',
-  password: 'PASSWORD_SCHEMA'
-});
+const sequelize = new Sequelize(SCHEMA_NAME, 'root', PASSWORD_SCHEMA, {dialect: 'mysql', host: 'localhost'});
 
-module.exports = pool.promise();
+module.exports = sequelize;
+
+// const mysql = require('mysql2');
+
+// const pool = mysql.createPool({
+//   host:'localhost',
+//   user: 'root',
+//   database: SCHEMA_NAME,
+//   password: PASSWORD_SCHEMA
+// });
+
+// module.exports = pool.promise();
