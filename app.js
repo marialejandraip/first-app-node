@@ -1,12 +1,12 @@
 const path = require('path');
 const express = require('express');
-//const sequelize = require('./util/database');
 
 const PORT = 3000;
 const routerAdmin = require('./routes/admin');
 const routerShop = require('./routes/shop')
-// const errorController = require('./controllers/error');
+const errorController = require('./controllers/error');
 const mongoConnect = require('./util/database').connectMongodb;
+const User = require('./models/user');
 
 const app = express();
 
@@ -20,39 +20,22 @@ app.use(express.urlencoded({extended:false}));
 app.use(express.static(path.join(__dirname,'public')));
 
 
-// app.use((req, res, next) => {
-//   User.findByPk(1).then(user => {
-//     req.user = user;
-//     next();
-//   })
-//   .catch(err => console.log(err))
-// })
+app.use((req, res, next) => {
+  User.findById('607f642d6aeb7717ddc0d3d0').then(user => {
+    //user the only one 
+    //req.user = user;
+    req.user = new User(user.name, user.email, user.cart, user._id)
+    next();
+  })
+  .catch(err => console.log(err))
+})
 
 app.use('/admin',routerAdmin.router);
 app.use(routerShop);
 
-//app.use('/', errorController.notFound404);
+app.use('/', errorController.notFound404);
 
-// sequelize
-// //.sync({force: true})
-// .sync()
-// .then(result => {
-//   return User.findByPk(1);
-//   //console.log(result);
-// }).then(user => {
-//   if(!user) {
-//     return User.create({userName: 'Maria', email: 'test@test.com'})
-//   }
-//   return user
-// }).then(user => {
-//   return user.createCart();
-// }).then(cart => {
-//   app.listen(PORT)
-// })
-// .catch(err => console.log(err));
 
 mongoConnect(() => {
-  
   app.listen(PORT)
-}
-)
+})
