@@ -21,7 +21,8 @@ class User {
 
   addToCart(product) {
     const cartProducts = this.cart.items.findIndex(cp => {
-      return cp._id == product._id;
+      console.log('AQUI', typeof(cp.productId));
+      return cp.productId.toString() === product._id.toString();
     })
     let newQuantity = 1;
     const updateCartItems = [...this.cart.items];
@@ -30,7 +31,10 @@ class User {
       newQuantity = this.cart.items[cartProducts].quantity + 1;
       updateCartItems[cartProducts].quantity = newQuantity;
     } else {
-      updateCartItems.push({productId: product._id, quantity: newQuantity})
+      updateCartItems.push({
+        productId: new mongodb.ObjectId(product._id), 
+        quantity: newQuantity
+      })
     }
     // aqui puede ingresar todo el obj de producto completo {...product, quantity: 1 }
     //Other way to add itemes {productId: product._id, quantity: newQuantity}
@@ -38,9 +42,43 @@ class User {
     const db = getDb();
     return db.collection('users').updateOne(
       {_id: new mongodb.ObjectId(this._id)}, 
-      {$set: {cart:updateCart}}
+      {$set: {cart:updateCart}} 
       );
   }
+
+  getCart () {
+  //   //Si en la coleccion de user estuvieran todos los datos de productos en item 
+  //   //return this.cart;
+  //   //Peroooo no es así 
+  const db = getDb();
+  const productsIds = this.cart.items.map(ids => {
+      return ids.productId
+    })
+return db
+.collection('products')
+.find({_id: {$in: productsIds}})
+.toArray()
+.then(products => {
+  return products.map(p => {
+    return {...p, quantity: this.cart.items.find(i => {
+      return i.productId.toString() === p._id.toString();
+    }).quantity
+    }
+  })
+  })
+  }
+
+  deleteItem (prodId) {
+    const updatedCartItems = this.cart.items.filter(item => {
+      return item.productId.toString() !== prodId.toString();
+    })
+    const db = getDb();
+    return db.collection('users').updateOne(
+      {_id: new mongodb.ObjectId(this._id)}, 
+      {$set: {cart: {items: updatedCartItems}}} 
+      );
+  }
+
 
   static findById(userId) {
     const db = getDb();
